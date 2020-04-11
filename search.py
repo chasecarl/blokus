@@ -61,13 +61,30 @@ def depth_first_search(problem):
     To get started, you might want to try some of these simple commands to
     understand the search problem that is being passed in:
 
-	print("Start:", problem.get_start_state().state)
+    print("Start:", problem.get_start_state().state)
     print("Is the start a goal?", problem.is_goal_state(problem.get_start_state()))
     print("Start's successors:", problem.get_successors(problem.get_start_state()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    #util.raiseNotDefined()
+    visited = []
+    return dfs_helper(problem, problem.get_start_state(), visited)[1].list[::-1]
 
+def dfs_helper(problem, state, visited, move=None):
+    if problem.is_goal_state(state):
+        moves = util.Stack()
+        moves.push(move)
+        return True, moves
+    visited.append(state)
+    for successor in problem.get_successors(state)[::-1]:
+        if successor[0] not in visited:
+            is_goal_path, moves = dfs_helper(problem, successor[0], visited, move=successor[1])
+            if not is_goal_path:
+                continue
+            if move:
+                moves.push(move)
+            return True, moves
+    return False, None
 
 def breadth_first_search(problem):
     """
@@ -99,7 +116,6 @@ def a_star_search(problem, heuristic=null_heuristic):
     """
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
-
 
 
 # Abbreviations
