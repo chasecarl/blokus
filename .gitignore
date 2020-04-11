@@ -8,3 +8,4 @@ layouts
 projects.css
 __pycache__
 venv
+.idea/
