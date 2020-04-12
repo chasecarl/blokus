@@ -15,6 +15,10 @@ class Node:
         self.state = state
         self.spawned_action = spawned_action
 
+    @classmethod
+    def root(cls, problem):
+        return Node(None, problem.get_start_state(), None)
+
     def add_child(self, child):
         self.childs.append(child)
 
