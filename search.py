@@ -6,6 +6,19 @@ import util
 from itertools import chain
 
 
+class Node:
+
+    def __init__(self, parent, state, spawned_action):
+        self.childs = []
+        self.parent = parent
+        self.parent.add_child(self)
+        self.state = state
+        self.spawned_action = spawned_action
+
+    def add_child(self, child):
+        self.childs.append(child)
+
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
