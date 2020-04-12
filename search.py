@@ -3,7 +3,7 @@ In search.py, you will implement generic search algorithms
 """
 
 import util
-
+from itertools import chain
 
 class SearchProblem:
     """
@@ -91,7 +91,29 @@ def breadth_first_search(problem):
     Search the shallowest nodes in the search tree first.
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    visited = []
+    successors = (problem.get_start_state())
+    return bfs_helper(problem, successors, visited)
+
+def bfs_helper(problem, successors, visited):
+    for successor in successors:
+        state = successor[0]
+        if state in visited:
+            continue
+        if problem.is_goal_state(state):
+            moves = util.Stack()
+            move = successor[1]
+            if move:
+                moves.push(move)
+            return True, moves, state
+        visited.append(state)
+    successors = chain.from_iterable(problem.get_successors(successor[0]) for successor in successors)
+    is_goal_path, moves, successor  = bfs_helper(problem, successors, visited)
+    if is_goal_path:
+        moves.push(successor[1])
+        for node in visited:
+            if successor in problem.get_successors(node):
+                return True, moves, node
 
 
 def uniform_cost_search(problem):
