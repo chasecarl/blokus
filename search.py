@@ -6,6 +6,12 @@ import util
 from itertools import chain
 
 
+STATE_SUCCESSOR = 0
+MOVE_SUCCESSOR = 1
+COST_SUCCESSOR = 2
+MOVES_DFS = 1
+
+
 class Node:
 
     def __init__(self, parent, state, spawned_action):
