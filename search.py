@@ -5,6 +5,7 @@ In search.py, you will implement generic search algorithms
 import util
 from itertools import chain
 
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
