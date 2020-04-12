@@ -92,9 +92,7 @@ def depth_first_search(problem):
     """
     visited = []
     root = Node.root(problem)
-    result = dfs_helper(problem, root, visited)[MOVES_DFS].list[::-1]
-    print(result)
-    return result
+    return dfs_helper(problem, root, visited)[MOVES_DFS].list[::-1]
 
 def dfs_helper(problem, node, visited):
     if problem.is_goal_state(node.state):
