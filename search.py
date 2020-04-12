@@ -94,6 +94,7 @@ def depth_first_search(problem):
     root = Node.root(problem)
     return dfs_helper(problem, root, visited)[MOVES_DFS].list[::-1]
 
+
 def dfs_helper(problem, node, visited):
     if problem.is_goal_state(node.state):
         moves = util.Stack()
@@ -114,6 +115,7 @@ def dfs_helper(problem, node, visited):
             return True, moves
     return False, None
 
+
 def breadth_first_search(problem):
     """
     Search the shallowest nodes in the search tree first.
@@ -121,6 +123,7 @@ def breadth_first_search(problem):
     visited = []
     successors = (problem.get_start_state())
     return bfs_helper(problem, successors, visited)
+
 
 def bfs_helper(problem, successors, visited):
     for successor in successors:
