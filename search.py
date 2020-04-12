@@ -65,8 +65,6 @@ def depth_first_search(problem):
     print("Is the start a goal?", problem.is_goal_state(problem.get_start_state()))
     print("Start's successors:", problem.get_successors(problem.get_start_state()))
     """
-    "*** YOUR CODE HERE ***"
-    #util.raiseNotDefined()
     visited = []
     return dfs_helper(problem, problem.get_start_state(), visited)[1].list[::-1]
 
@@ -90,7 +88,6 @@ def breadth_first_search(problem):
     """
     Search the shallowest nodes in the search tree first.
     """
-    "*** YOUR CODE HERE ***"
     visited = []
     successors = (problem.get_start_state())
     return bfs_helper(problem, successors, visited)
