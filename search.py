@@ -14,16 +14,17 @@ MOVES_DFS = 1
 
 class Node:
 
-    def __init__(self, parent, state, spawned_action):
+    def __init__(self, state, parent=None, spawned_move=None):
         self.childs = []
         self.parent = parent
-        self.parent.add_child(self)
+        if self.parent:
+            self.parent.add_child(self)
         self.state = state
-        self.spawned_action = spawned_action
+        self.spawned_move = spawned_move
 
     @classmethod
     def root(cls, problem):
-        return Node(None, problem.get_start_state(), None)
+        return Node(problem.get_start_state())
 
     def add_child(self, child):
         self.childs.append(child)
@@ -90,21 +91,28 @@ def depth_first_search(problem):
     print("Start's successors:", problem.get_successors(problem.get_start_state()))
     """
     visited = []
-    return dfs_helper(problem, problem.get_start_state(), visited)[1].list[::-1]
+    root = Node.root(problem)
+    result = dfs_helper(problem, root, visited)[MOVES_DFS].list[::-1]
+    print(result)
+    return result
 
-def dfs_helper(problem, state, visited, move=None):
-    if problem.is_goal_state(state):
+def dfs_helper(problem, node, visited):
+    if problem.is_goal_state(node.state):
         moves = util.Stack()
-        moves.push(move)
+        moves.push(node.spawned_move)
         return True, moves
-    visited.append(state)
-    for successor in problem.get_successors(state)[::-1]:
-        if successor[0] not in visited:
-            is_goal_path, moves = dfs_helper(problem, successor[0], visited, move=successor[1])
+    visited.append(node.state)
+    successors = problem.get_successors(node.state)[::-1]
+    for successor in successors:
+        state = successor[STATE_SUCCESSOR]
+        if state not in visited:
+            move = successor[MOVE_SUCCESSOR]
+            child = Node(state, parent=node, spawned_move=move)
+            is_goal_path, moves = dfs_helper(problem, child, visited)
             if not is_goal_path:
                 continue
-            if move:
-                moves.push(move)
+            if node.spawned_move:
+                moves.push(node.spawned_move)
             return True, moves
     return False, None
 
