@@ -122,29 +122,38 @@ def breadth_first_search(problem):
     Search the shallowest nodes in the search tree first.
     """
     visited = []
-    successors = (problem.get_start_state())
-    return bfs_helper(problem, successors, visited)
+    # syntax to specify that it's a tuple and not an expression inside parenthesis
+    only_root = (Node.root(problem), )
+    moves = bfs_helper(problem, only_root, visited)[MOVES_BFS].list[::-1]
+    print(f'{len(moves)}\n{moves}')
+    return moves
 
 
-def bfs_helper(problem, successors, visited):
-    for successor in successors:
-        state = successor[0]
-        if state in visited:
+def bfs_helper(problem, nodes, visited):
+    successor_nodes = []
+    for node in nodes:
+        if node.state in visited:
             continue
-        if problem.is_goal_state(state):
+        visited.append(node.state)
+        if problem.is_goal_state(node.state):
             moves = util.Stack()
-            move = successor[1]
-            if move:
-                moves.push(move)
-            return True, moves, state
-        visited.append(state)
-    successors = chain.from_iterable(problem.get_successors(successor[0]) for successor in successors)
-    is_goal_path, moves, successor  = bfs_helper(problem, successors, visited)
+            if node.spawned_move:
+                moves.push(node.spawned_move)
+            return True, moves, node.parent
+        # appending a generator at each step
+        successor_nodes.append(Node(
+            successor[STATE_SUCCESSOR],
+            parent=node,
+            spawned_move=successor[MOVE_SUCCESSOR]
+        ) for successor in problem.get_successors(node.state))
+    # chaining the generators
+    successor_nodes = chain.from_iterable(successor_nodes)
+    is_goal_path, moves, parent = bfs_helper(problem, successor_nodes, visited)
     if is_goal_path:
-        moves.push(successor[1])
-        for node in visited:
-            if successor in problem.get_successors(node):
-                return True, moves, node
+        if parent.spawned_move:
+            moves.push(parent.spawned_move)
+        return True, moves, parent.parent
+    return False, None, None
 
 
 def uniform_cost_search(problem):
