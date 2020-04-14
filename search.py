@@ -3,14 +3,12 @@ In search.py, you will implement generic search algorithms
 """
 
 import util
-from itertools import chain
+from collections import deque
 
 
 STATE_SUCCESSOR = 0
 MOVE_SUCCESSOR = 1
 COST_SUCCESSOR = 2
-MOVES_DFS = 1
-MOVES_BFS = 1
 
 
 class Node:
@@ -29,6 +27,54 @@ class Node:
 
     def add_child(self, child):
         self.childs.append(child)
+
+
+class Fringe:
+    
+    def add(self, element):
+        """
+        Adds an element to the fringe
+        """
+        pass
+
+    def retrieve(self):
+        """
+        Gets the next element and removes it from the fringe
+        """
+        pass
+
+    def __bool__(self):
+        pass
+
+
+class Stack(Fringe):
+
+    def __init__(self):
+        self.deque = deque()
+
+    def add(self, element):
+        self.deque.append(element)
+
+    def retrieve(self):
+        return self.deque.pop()
+
+    def __bool__(self):
+        return len(self.deque) != 0
+
+
+class Queue(Fringe):
+
+    def __init__(self):
+        self.deque = deque()
+
+    def add(self, element):
+        self.deque.appendleft(element)
+
+    def retrieve(self):
+        return self.deque.pop()
+
+    def __bool__(self):
+        return len(self.deque) != 0
 
 
 class SearchProblem:
@@ -75,6 +121,34 @@ class SearchProblem:
         util.raiseNotDefined()
 
 
+def restore_actions(goal_node):
+    reverse_actions = []
+    current = goal_node
+    while current:
+        if current.spawned_move:
+            reverse_actions.append(current.spawned_move)
+        current = current.parent
+    return reverse_actions[::-1]
+
+
+def generic_search(problem, fringe):
+    fringe.add(Node.root(problem))
+    visited = set()
+    while fringe:
+        current = fringe.retrieve()
+
+        if problem.is_goal_state(current.state):
+            return restore_actions(current)
+        if current.state not in visited:
+            for successor in problem.get_successors(current.state):
+                fringe.add(Node(
+                    successor[STATE_SUCCESSOR],
+                    parent=current,
+                    spawned_move=successor[MOVE_SUCCESSOR]
+                ))
+
+            visited.add(current.state)
+    return None
 
 
 def depth_first_search(problem):
@@ -91,65 +165,16 @@ def depth_first_search(problem):
     print("Is the start a goal?", problem.is_goal_state(problem.get_start_state()))
     print("Start's successors:", problem.get_successors(problem.get_start_state()))
     """
-    visited = []
-    root = Node.root(problem)
-    return dfs_helper(problem, root, visited)[MOVES_DFS].list[::-1]
-
-
-def dfs_helper(problem, node, visited):
-    if problem.is_goal_state(node.state):
-        moves = util.Stack()
-        moves.push(node.spawned_move)
-        return True, moves
-    visited.append(node.state)
-    successors = problem.get_successors(node.state)[::-1]
-    for successor in successors:
-        state = successor[STATE_SUCCESSOR]
-        if state not in visited:
-            move = successor[MOVE_SUCCESSOR]
-            child = Node(state, parent=node, spawned_move=move)
-            is_goal_path, moves = dfs_helper(problem, child, visited)
-            if not is_goal_path:
-                continue
-            if node.spawned_move:
-                moves.push(node.spawned_move)
-            return True, moves
-    return False, None
+    fringe = Stack()
+    return generic_search(problem, fringe)
 
 
 def breadth_first_search(problem):
     """
     Search the shallowest nodes in the search tree first.
     """
-    visited = []
-    # syntax to specify that it's a tuple and not an expression inside parenthesis
-    only_root = (Node.root(problem), )
-    return bfs_helper(problem, only_root, visited)[MOVES_BFS].list[::-1]
-
-
-def bfs_helper(problem, nodes, visited):
-    successor_nodes = []
-    for node in nodes:
-        if node.state in visited:
-            continue
-        visited.append(node.state)
-        if problem.is_goal_state(node.state):
-            moves = util.Stack()
-            if node.spawned_move:
-                moves.push(node.spawned_move)
-            return True, moves, node.parent
-        for successor in problem.get_successors(node.state):
-            successor_nodes.append(Node(
-                successor[STATE_SUCCESSOR],
-                parent=node,
-                spawned_move=successor[MOVE_SUCCESSOR])
-            )
-    is_goal_path, moves, parent = bfs_helper(problem, successor_nodes, visited)
-    if is_goal_path:
-        if parent.spawned_move:
-            moves.push(parent.spawned_move)
-        return True, moves, parent.parent
-    return False, None, None
+    fringe = Queue()
+    return generic_search(problem, fringe)
 
 
 def uniform_cost_search(problem):
