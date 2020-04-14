@@ -13,13 +13,13 @@ COST_SUCCESSOR = 2
 
 class Node:
 
-    def __init__(self, state, parent=None, spawned_move=None):
+    def __init__(self, state, parent=None, spawned_action=None):
         self.childs = []
         self.parent = parent
         if self.parent:
             self.parent.add_child(self)
         self.state = state
-        self.spawned_move = spawned_move
+        self.spawned_action = spawned_action
 
     @classmethod
     def root(cls, problem):
@@ -125,8 +125,8 @@ def restore_actions(goal_node):
     reverse_actions = []
     current = goal_node
     while current:
-        if current.spawned_move:
-            reverse_actions.append(current.spawned_move)
+        if current.spawned_action:
+            reverse_actions.append(current.spawned_action)
         current = current.parent
     return reverse_actions[::-1]
 
@@ -144,7 +144,7 @@ def generic_search(problem, fringe):
                 fringe.add(Node(
                     successor[STATE_SUCCESSOR],
                     parent=current,
-                    spawned_move=successor[MOVE_SUCCESSOR]
+                    spawned_action=successor[MOVE_SUCCESSOR]
                 ))
 
             visited.add(current.state)
