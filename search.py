@@ -138,7 +138,6 @@ def bfs_helper(problem, nodes, visited):
             if node.spawned_move:
                 moves.push(node.spawned_move)
             return True, moves, node.parent
-        # appending a generator at each step
         for successor in problem.get_successors(node.state):
             successor_nodes.append(Node(
                 successor[STATE_SUCCESSOR],
