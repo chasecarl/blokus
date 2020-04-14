@@ -124,9 +124,7 @@ def breadth_first_search(problem):
     visited = []
     # syntax to specify that it's a tuple and not an expression inside parenthesis
     only_root = (Node.root(problem), )
-    moves = bfs_helper(problem, only_root, visited)[MOVES_BFS].list[::-1]
-    print(f'{len(moves)}\n{moves}')
-    return moves
+    return bfs_helper(problem, only_root, visited)[MOVES_BFS].list[::-1]
 
 
 def bfs_helper(problem, nodes, visited):
@@ -141,13 +139,12 @@ def bfs_helper(problem, nodes, visited):
                 moves.push(node.spawned_move)
             return True, moves, node.parent
         # appending a generator at each step
-        successor_nodes.append(Node(
-            successor[STATE_SUCCESSOR],
-            parent=node,
-            spawned_move=successor[MOVE_SUCCESSOR]
-        ) for successor in problem.get_successors(node.state))
-    # chaining the generators
-    successor_nodes = chain.from_iterable(successor_nodes)
+        for successor in problem.get_successors(node.state):
+            successor_nodes.append(Node(
+                successor[STATE_SUCCESSOR],
+                parent=node,
+                spawned_move=successor[MOVE_SUCCESSOR])
+            )
     is_goal_path, moves, parent = bfs_helper(problem, successor_nodes, visited)
     if is_goal_path:
         if parent.spawned_move:
