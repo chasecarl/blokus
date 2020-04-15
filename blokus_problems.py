@@ -66,10 +66,10 @@ class BlokusCornersProblem(SearchProblem):
         return self.board
 
     def is_goal_state(self, state):
-        return self.board.get_position(0, 0) != -1 \
-               and self.board.get_position(0, self.board.board_h - 1) != -1 \
-               and self.board.get_position(self.board.board_w - 1, 0) != -1 \
-               and self.board.get_position(self.board.board_w - 1, self.board.board_h - 1) != -1
+        return state.get_position(0, 0) != -1\
+               and state.get_position(0, state.board_h - 1) != -1 \
+               and state.get_position(state.board_w - 1, 0) != -1 \
+               and state.get_position(state.board_w - 1, state.board_h - 1) != -1
 
     def get_successors(self, state):
         """
