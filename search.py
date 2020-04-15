@@ -13,6 +13,15 @@ MOVE_SUCCESSOR = 1
 COST_SUCCESSOR = 2
 
 
+def null_heuristic(state, problem=None):
+    """
+    A heuristic function estimates the cost from the current state to the nearest
+    goal in the provided SearchProblem.  This heuristic is trivial.
+    """
+    return 0
+
+
+
 class Node:
 
     def __init__(self, state, parent=None, spawned_action=None):
@@ -24,10 +33,10 @@ class Node:
         self.spawned_action = spawned_action
     @classmethod
     def root(cls, problem):
-        return Node(problem.get_start_state())
+        return cls(problem.get_start_state())
 
     @classmethod
-    def from_successor(cls, successor, parent):
+    def from_successor(cls, successor, parent, heuristic=None, problem=None):
         return cls(
             successor[STATE_SUCCESSOR],
             parent=parent,
@@ -44,14 +53,32 @@ class PrioritizedNode(Node):
     def __init__(self, state, parent=None, spawned_action=None, priority=0):
         super().__init__(state, parent=parent, spawned_action=spawned_action)
         self.priority = priority
+        if self.parent:
+            self.priority += self.parent.priority
 
     @classmethod
-    def from_successor(cls, successor, parent):
+    def from_successor(cls, successor, parent, heuristic=None, problem=None):
         return cls(
             successor[STATE_SUCCESSOR],
             parent=parent,
             spawned_action=successor[MOVE_SUCCESSOR],
             priority=successor[COST_SUCCESSOR]
+        )
+
+# @dataclass(order=True)
+class HeuristicNode(PrioritizedNode):
+    def __init__(self, state, parent=None, spawned_action=None, priority=0, heuristic=null_heuristic, problem=None):
+        super().__init__(state, parent=parent, spawned_action=spawned_action, priority=priority)
+        self.priority+=heuristic(state, problem=problem)
+    @classmethod
+    def from_successor(cls, successor, parent, heuristic=null_heuristic, problem=None):
+        return cls(
+            successor[STATE_SUCCESSOR],
+            parent=parent,
+            spawned_action=successor[MOVE_SUCCESSOR],
+            priority=successor[COST_SUCCESSOR],
+            heuristic=heuristic,
+            problem=problem
         )
 
 class Fringe:
@@ -168,9 +195,9 @@ def restore_actions(goal_node):
     return reverse_actions[::-1]
 
 
-def generic_search(problem, fringe_class, node_class=Node):
+def generic_search(problem, fringe_class, node_class=Node, heuristic=null_heuristic):
     fringe = fringe_class()
-    fringe.add(Node.root(problem))
+    fringe.add(node_class.root(problem))
     visited = set()
     while fringe:
         current = fringe.retrieve()
@@ -179,7 +206,7 @@ def generic_search(problem, fringe_class, node_class=Node):
             return restore_actions(current)
         if current.state not in visited:
             for successor in problem.get_successors(current.state):
-                fringe.add(node_class.from_successor(successor, current))
+                fringe.add(node_class.from_successor(successor, current, heuristic=heuristic, problem=problem))
 
             visited.add(current.state)
     return None
@@ -216,20 +243,11 @@ def uniform_cost_search(problem):
     return generic_search(problem, PriorityQueue, node_class=PrioritizedNode)
 
 
-def null_heuristic(state, problem=None):
-    """
-    A heuristic function estimates the cost from the current state to the nearest
-    goal in the provided SearchProblem.  This heuristic is trivial.
-    """
-    return 0
-
-
 def a_star_search(problem, heuristic=null_heuristic):
     """
     Search the node that has the lowest combined cost and heuristic first.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return generic_search(problem, PriorityQueue, node_class=HeuristicNode, heuristic=null_heuristic)
 
 
 # Abbreviations
