@@ -4,7 +4,9 @@ In search.py, you will implement generic search algorithms
 
 import util
 from collections import deque
-
+from queue import PriorityQueue as PQ
+from dataclasses import dataclass, field
+from typing import Any
 
 STATE_SUCCESSOR = 0
 MOVE_SUCCESSOR = 1
@@ -14,20 +16,43 @@ COST_SUCCESSOR = 2
 class Node:
 
     def __init__(self, state, parent=None, spawned_action=None):
-        self.childs = []
+        self.children = []
         self.parent = parent
         if self.parent:
             self.parent.add_child(self)
         self.state = state
         self.spawned_action = spawned_action
-
     @classmethod
     def root(cls, problem):
         return Node(problem.get_start_state())
 
-    def add_child(self, child):
-        self.childs.append(child)
+    @classmethod
+    def from_successor(cls, successor, parent):
+        return cls(
+            successor[STATE_SUCCESSOR],
+            parent=parent,
+            spawned_action=successor[MOVE_SUCCESSOR]
+        )
 
+    def add_child(self, child):
+        self.children.append(child)
+
+@dataclass(order=True)
+class PrioritizedNode(Node):
+    priority: int
+    # node: Any=field(compare=False)
+    def __init__(self, state, parent=None, spawned_action=None, priority=0):
+        super().__init__(state, parent=parent, spawned_action=spawned_action)
+        self.priority = priority
+
+    @classmethod
+    def from_successor(cls, successor, parent):
+        return cls(
+            successor[STATE_SUCCESSOR],
+            parent=parent,
+            spawned_action=successor[MOVE_SUCCESSOR],
+            priority=successor[COST_SUCCESSOR]
+        )
 
 class Fringe:
     
@@ -76,6 +101,18 @@ class Queue(Fringe):
     def __bool__(self):
         return len(self.deque) != 0
 
+class PriorityQueue(Fringe):
+    def __init__(self):
+        self.queue = PQ()
+
+    def add(self, element):
+        self.queue.put(element)
+
+    def retrieve(self):
+        return self.queue.get()
+
+    def __bool__(self):
+        return not self.queue.empty()
 
 class SearchProblem:
     """
@@ -131,7 +168,8 @@ def restore_actions(goal_node):
     return reverse_actions[::-1]
 
 
-def generic_search(problem, fringe):
+def generic_search(problem, fringe_class, node_class=Node):
+    fringe = fringe_class()
     fringe.add(Node.root(problem))
     visited = set()
     while fringe:
@@ -141,11 +179,7 @@ def generic_search(problem, fringe):
             return restore_actions(current)
         if current.state not in visited:
             for successor in problem.get_successors(current.state):
-                fringe.add(Node(
-                    successor[STATE_SUCCESSOR],
-                    parent=current,
-                    spawned_action=successor[MOVE_SUCCESSOR]
-                ))
+                fringe.add(node_class.from_successor(successor, current))
 
             visited.add(current.state)
     return None
@@ -165,24 +199,21 @@ def depth_first_search(problem):
     print("Is the start a goal?", problem.is_goal_state(problem.get_start_state()))
     print("Start's successors:", problem.get_successors(problem.get_start_state()))
     """
-    fringe = Stack()
-    return generic_search(problem, fringe)
+    return generic_search(problem, Stack)
 
 
 def breadth_first_search(problem):
     """
     Search the shallowest nodes in the search tree first.
     """
-    fringe = Queue()
-    return generic_search(problem, fringe)
+    return generic_search(problem, Queue)
 
 
 def uniform_cost_search(problem):
     """
     Search the node of least total cost first.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return generic_search(problem, PriorityQueue, node_class=PrioritizedNode)
 
 
 def null_heuristic(state, problem=None):
