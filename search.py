@@ -247,7 +247,7 @@ def a_star_search(problem, heuristic=null_heuristic):
     """
     Search the node that has the lowest combined cost and heuristic first.
     """
-    return generic_search(problem, PriorityQueue, node_class=HeuristicNode, heuristic=null_heuristic)
+    return generic_search(problem, PriorityQueue, node_class=HeuristicNode, heuristic=heuristic)
 
 
 # Abbreviations
