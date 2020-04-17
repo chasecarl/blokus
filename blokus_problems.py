@@ -108,14 +108,11 @@ def blokus_corners_heuristic(state, problem):
     your heuristic is *not* consistent, and probably not admissible!  On the other hand,
     inadmissible or inconsistent heuristics may find optimal solutions, so be careful.
     """
+    sum = int(state.get_position(0, state.board_h - 1) == -1) \
+        + int(state.get_position(state.board_w - 1, 0) == -1) \
+        + int(state.get_position(state.board_w - 1, state.board_h - 1) == -1)
 
-
-    return sum(-1 * 20 for corner in [
-        state.get_position(0, state.board_h - 1),
-        state.get_position(state.board_w - 1, 0),
-        state.get_position(state.board_w - 1, state.board_h - 1)]
-        if corner != -1
-    )
+    return sum*(sum+1)*(sum*2+1)/6-sum//3
 
 
 class BlokusCoverProblem(SearchProblem):
