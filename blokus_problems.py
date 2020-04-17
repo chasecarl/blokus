@@ -110,11 +110,12 @@ def blokus_corners_heuristic(state, problem):
     """
 
 
-    return sum(-1 for corner in [state.get_position(0, 0),
+    return sum(-1 * 20 for corner in [
         state.get_position(0, state.board_h - 1),
         state.get_position(state.board_w - 1, 0),
         state.get_position(state.board_w - 1, state.board_h - 1)]
-        if corner != -1)
+        if corner != -1
+    )
 
 
 class BlokusCoverProblem(SearchProblem):
