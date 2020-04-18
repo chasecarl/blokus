@@ -2,7 +2,6 @@ from board import Board
 from search import SearchProblem, ucs
 import util
 
-
 class BlokusFillProblem(SearchProblem):
     """
     A one-player Blokus game as a search problem.
@@ -108,11 +107,23 @@ def blokus_corners_heuristic(state, problem):
     your heuristic is *not* consistent, and probably not admissible!  On the other hand,
     inadmissible or inconsistent heuristics may find optimal solutions, so be careful.
     """
-    sum = int(state.get_position(0, state.board_h - 1) == -1) \
+    n_empty = int(state.get_position(0, state.board_h - 1) == -1) \
         + int(state.get_position(state.board_w - 1, 0) == -1) \
         + int(state.get_position(state.board_w - 1, state.board_h - 1) == -1)
 
-    return sum*(sum+1)*(sum*2+1)/6-sum//3
+    # min_list = sorted(problem.board.piece_list, key=Piece.get_num_tiles)
+
+    if n_empty == 0:
+        return 0
+
+    sum = 0
+    for piece in problem.board.piece_list.pieces[:n_empty]:
+        sum+=piece.get_num_tiles()
+
+    return sum
+
+# def retrieve_pieces(problem):
+#     return sorted(problem.board.piece_list, key=Piece.get_num_tiles)
 
 
 class BlokusCoverProblem(SearchProblem):
