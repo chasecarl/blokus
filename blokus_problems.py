@@ -129,8 +129,6 @@ def blokus_corners_heuristic(state, problem):
 class BlokusCoverProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=[(0, 0)]):
         self.targets = targets.copy()
-        if (0,0) not in targets:
-            self.targets.append((0,0))
         self.expanded = 0
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
 
@@ -171,8 +169,11 @@ class BlokusCoverProblem(SearchProblem):
 
 
 def blokus_cover_heuristic(state, problem):
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    n_empty = 0
+    for target in problem.targets:
+        if state.get_position(target[1], target[0]) == -1:
+            n_empty+=1
+    return n_empty
 
 
 class ClosestLocationSearch:
