@@ -111,8 +111,6 @@ def blokus_corners_heuristic(state, problem):
         + int(state.get_position(state.board_w - 1, 0) == -1) \
         + int(state.get_position(state.board_w - 1, state.board_h - 1) == -1)
 
-    # min_list = sorted(problem.board.piece_list, key=Piece.get_num_tiles)
-
     if n_empty == 0:
         return 0
 
@@ -121,9 +119,6 @@ def blokus_corners_heuristic(state, problem):
         sum+=piece.get_num_tiles()
 
     return sum
-
-# def retrieve_pieces(problem):
-#     return sorted(problem.board.piece_list, key=Piece.get_num_tiles)
 
 
 class BlokusCoverProblem(SearchProblem):
@@ -172,7 +167,7 @@ def blokus_cover_heuristic(state, problem):
     n_empty = 0
     for target in problem.targets:
         if state.get_position(target[1], target[0]) == -1:
-            n_empty+=1
+            n_empty += 1
     return n_empty
 
 
