@@ -1,6 +1,8 @@
 from board import Board
 from search import SearchProblem, ucs
 import util
+import numpy as np
+
 
 class BlokusFillProblem(SearchProblem):
     """
@@ -123,7 +125,9 @@ def blokus_corners_heuristic(state, problem):
 
 class BlokusCoverProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=[(0, 0)]):
-        self.targets = targets.copy()
+        self.targets = np.array(targets)
+        self.target_rows = self.targets[:,0]
+        self.target_cols = self.targets[:,1]
         self.expanded = 0
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
 
@@ -164,11 +168,15 @@ class BlokusCoverProblem(SearchProblem):
 
 
 def blokus_cover_heuristic(state, problem):
-    n_empty = 0
-    for target in problem.targets:
-        if state.get_position(target[1], target[0]) == -1:
-            n_empty += 1
-    return n_empty
+    # n_empty = 0
+    # for target in problem.targets:
+    #     if state.get_position(target[1], target[0]) == -1:
+    #         n_empty += 1
+    # return n_empty
+    return np.count_nonzero(state.state[
+        problem.target_rows,
+        problem.target_cols
+    ] == -1)
 
 
 class ClosestLocationSearch:
@@ -180,13 +188,20 @@ class ClosestLocationSearch:
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=(0, 0)):
         self.expanded = 0
         self.targets = targets.copy()
-        "*** YOUR CODE HERE ***"
+        self.target_rows = self.targets[:,0]
+        self.target_cols = self.targets[:,1]
+        self.board = Board(board_w, board_h, 1, piece_list, starting_point)
+        self.expanded = 0
 
     def get_start_state(self):
         """
         Returns the start state for the search problem
         """
         return self.board
+
+    def get_successors(self, state):
+        self.expanded += 1
+        return ((state.do_move(0), move) for move in state.get_legal_moves(0))
 
     def solve(self):
         """
@@ -197,16 +212,33 @@ class ClosestLocationSearch:
 
         Probably a good way to start, would be something like this --
 
+        """
         current_state = self.board.__copy__()
         backtrace = []
+        back_counter = 0
 
-        while ....
+        while np.count_nonzero(current_state.state[
+            self.target_rows,
+            self.target_cols
+        ] == -1) != 0:
 
-            actions = set of actions that covers the closets uncovered target location
-            add actions to backtrace
+
+            actions = sorted(
+                self.get_successors(self.current_state),
+                key=lambda s: np.count_nonzero(s[0][
+                    self.target_rows,
+                    self.target_cols
+                ])
+            )
+            back_counter += len(actions)
+            backtrace.extend(actions)
+
+            ###????                
+
+            # actions = set of actions that covers the closets uncovered target location
+            # add actions to backtrace
 
         return backtrace
-        """
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
 
