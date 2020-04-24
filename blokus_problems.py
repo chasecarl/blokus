@@ -1,5 +1,5 @@
 from board import Board
-from search import SearchProblem, ucs
+from search import SearchProblem, dfs
 import util
 import numpy as np
 
@@ -176,7 +176,7 @@ def blokus_cover_heuristic(state, problem):
     return np.count_nonzero(state.state[
         problem.target_rows,
         problem.target_cols
-    ] == -1)
+    ] == -1)/2
 
 
 class ClosestLocationSearch:
@@ -187,11 +187,10 @@ class ClosestLocationSearch:
 
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=(0, 0)):
         self.expanded = 0
-        self.targets = targets.copy()
+        self.targets = np.array(targets.copy())
         self.target_rows = self.targets[:,0]
         self.target_cols = self.targets[:,1]
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
-        self.expanded = 0
 
     def get_start_state(self):
         """
@@ -201,7 +200,13 @@ class ClosestLocationSearch:
 
     def get_successors(self, state):
         self.expanded += 1
-        return ((state.do_move(0), move) for move in state.get_legal_moves(0))
+        return ((state.do_move(0, move), move, 0) for move in state.get_legal_moves(0))
+
+    def is_goal_state(self, state):
+        return np.count_nonzero(state.state[
+                self.target_rows,
+                self.target_cols
+                ] == -1) == 0
 
     def solve(self):
         """
@@ -213,34 +218,34 @@ class ClosestLocationSearch:
         Probably a good way to start, would be something like this --
 
         """
-        current_state = self.board.__copy__()
-        backtrace = []
-        back_counter = 0
+        # current_state = self.board.__copy__()
+        # backtrace = []
+        # back_counter = 0
 
-        while np.count_nonzero(current_state.state[
-            self.target_rows,
-            self.target_cols
-        ] == -1) != 0:
-
-
-            actions = sorted(
-                self.get_successors(self.current_state),
-                key=lambda s: np.count_nonzero(s[0][
-                    self.target_rows,
-                    self.target_cols
-                ])
-            )
-            back_counter += len(actions)
-            backtrace.extend(actions)
+        # while np.count_nonzero(current_state.state[
+        #     self.target_rows,
+        #     self.target_cols
+        # ] == -1) != 0:
+        #
+        #
+        #     actions = sorted(
+        #         self.get_successors(self.current_state),
+        #         key=lambda s: np.count_nonzero(s[0][
+        #             self.target_rows,
+        #             self.target_cols
+        #         ])
+        #     )
+        #     back_counter += len(actions)
+        #     backtrace.extend(actions)
 
             ###????                
 
             # actions = set of actions that covers the closets uncovered target location
             # add actions to backtrace
 
-        return backtrace
+        return dfs(self )
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # util.raiseNotDefined()
 
 
 
