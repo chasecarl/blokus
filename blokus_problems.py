@@ -224,7 +224,7 @@ class ClosestLocationSearch:
         Probably a good way to start, would be something like this --
 
         """
-        n_iter = 30
+        n_iter = 100
         t = 0
         current = Node(self.get_start_state())
         backtrace  = []
