@@ -1,8 +1,8 @@
 from board import Board
-from search import SearchProblem, dfs
+from search import SearchProblem, Node, STATE_SUCCESSOR, MOVE_SUCCESSOR
+from random import choice, random
 import util
 import numpy as np
-
 
 class BlokusFillProblem(SearchProblem):
     """
@@ -200,7 +200,13 @@ class ClosestLocationSearch:
 
     def get_successors(self, state):
         self.expanded += 1
-        return ((state.do_move(0, move), move, 0) for move in state.get_legal_moves(0))
+        return [(state.do_move(0, move), move) for move in state.get_legal_moves(0)]
+
+    def objective_function(self, state):
+        return np.count_nonzero(state.state[
+                                    self.target_rows,
+                                    self.target_cols
+                                ] == -1)
 
     def is_goal_state(self, state):
         return np.count_nonzero(state.state[
@@ -218,34 +224,27 @@ class ClosestLocationSearch:
         Probably a good way to start, would be something like this --
 
         """
-        # current_state = self.board.__copy__()
-        # backtrace = []
-        # back_counter = 0
-
-        # while np.count_nonzero(current_state.state[
-        #     self.target_rows,
-        #     self.target_cols
-        # ] == -1) != 0:
-        #
-        #
-        #     actions = sorted(
-        #         self.get_successors(self.current_state),
-        #         key=lambda s: np.count_nonzero(s[0][
-        #             self.target_rows,
-        #             self.target_cols
-        #         ])
-        #     )
-        #     back_counter += len(actions)
-        #     backtrace.extend(actions)
-
-            ###????                
-
-            # actions = set of actions that covers the closets uncovered target location
-            # add actions to backtrace
-
-        return dfs(self )
-        "*** YOUR CODE HERE ***"
-        # util.raiseNotDefined()
+        n_iter = 30
+        t = 0
+        current = Node(self.get_start_state())
+        backtrace  = []
+        while True:
+            if t == n_iter-1 or self.is_goal_state(current.state):
+                return backtrace
+            successors = self.get_successors(current.state)
+            successors.sort(key=lambda successor: self.objective_function(successor[STATE_SUCCESSOR]))
+            if len(successors) == 0:
+                return backtrace
+            best_score = self.objective_function(successors[0][STATE_SUCCESSOR])
+            best_successors = [successor for successor in successors
+                               if self.objective_function(successor[STATE_SUCCESSOR]) == best_score]
+            successor = choice(best_successors)
+            candidate = Node(successor[STATE_SUCCESSOR], parent=current, spawned_action=successor[MOVE_SUCCESSOR])
+            delta_e = self.objective_function(candidate.state)- self.objective_function(current.state)
+            if delta_e <0 or random()<0.5**(t+1):
+                current = candidate
+                backtrace.append(current.spawned_action)
+            t+=1
 
 
 
