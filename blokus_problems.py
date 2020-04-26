@@ -76,10 +76,10 @@ class BlokusCornersProblem(SearchProblem):
         return self.board
 
     def is_goal_state(self, state):
-        return state.get_position(0, 0) != -1\
-               and state.get_position(0, state.board_h - 1) != -1 \
-               and state.get_position(state.board_w - 1, 0) != -1 \
-               and state.get_position(state.board_w - 1, state.board_h - 1) != -1
+        return np.count_nonzero(state.state[
+            self.target_rows,
+            self.target_cols
+        ] == -1) == 0
 
     def get_successors(self, state):
         """
@@ -121,7 +121,11 @@ def blokus_corners_heuristic(state, problem):
     return np.count_nonzero(state.state[
         problem.target_rows,
         problem.target_cols
-    ] == -1) / 2
+    ] == -1) / 2 \
+            + 1000 * int(np.any(state._legal[0, :, :,][
+        problem.target_rows,
+        problem.target_cols
+    ]))
 
 
 class BlokusCoverProblem(SearchProblem):
