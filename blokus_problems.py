@@ -218,7 +218,6 @@ class ClosestLocationSearch:
         Therefore, your agent should try and cover one target location at a time. Each time, aiming for the closest uncovered location.
         You may define helpful functions as you wish.
         """
-        self.n_iter = 30
         t = 0
         current = Node(self.get_start_state())
         backtrace  = []
