@@ -226,13 +226,13 @@ class ClosestLocationSearch:
             if t == self.n_iter - 1 or self.is_goal_state(current.state):
                 return backtrace
             successors = self.get_successors(current.state)
-            successors.sort(key=lambda successor: self.objective_function(successor[STATE_SUCCESSOR]))
-            if len(successors) == 0:
-                return backtrace
-            best_score = self.objective_function(successors[0][STATE_SUCCESSOR])
-            best_successors = [successor for successor in successors
-                               if self.objective_function(successor[STATE_SUCCESSOR]) == best_score]
-            successor = choice(best_successors)
+            # successors.sort(key=lambda successor: self.objective_function(successor[STATE_SUCCESSOR]))
+            # if len(successors) == 0:
+            #     return backtrace
+            # best_score = self.objective_function(successors[0][STATE_SUCCESSOR])
+            # best_successors = [successor for successor in successors
+            #                    if self.objective_function(successor[STATE_SUCCESSOR]) == best_score]
+            successor = choice(successors)
             candidate = Node(successor[STATE_SUCCESSOR], parent=current, spawned_action=successor[MOVE_SUCCESSOR])
             delta_e = self.objective_function(candidate.state)- self.objective_function(current.state)
             if delta_e < 0 or random() < 0.5 * (0.9 ** (t + 1)):
