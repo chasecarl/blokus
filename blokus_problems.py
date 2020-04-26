@@ -58,6 +58,14 @@ class BlokusFillProblem(SearchProblem):
 #####################################################
 class BlokusCornersProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0)):
+        targets = np.array([
+            (0, 0),
+            (0, board_h - 1),
+            (board_w - 1, 0),
+            (board_w - 1, board_h - 1)
+        ])
+        self.target_rows = targets[:,0]
+        self.target_cols = targets[:,1]
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
         self.expanded = 0
 
@@ -110,18 +118,10 @@ def blokus_corners_heuristic(state, problem):
     your heuristic is *not* consistent, and probably not admissible!  On the other hand,
     inadmissible or inconsistent heuristics may find optimal solutions, so be careful.
     """
-    n_empty = int(state.get_position(0, state.board_h - 1) == -1) \
-        + int(state.get_position(state.board_w - 1, 0) == -1) \
-        + int(state.get_position(state.board_w - 1, state.board_h - 1) == -1)
-
-    if n_empty == 0:
-        return 0
-
-    sum = 0
-    for piece in problem.board.piece_list.pieces[:n_empty]:
-        sum += piece.get_num_tiles()
-
-    return sum
+    return np.count_nonzero(state.state[
+        problem.target_rows,
+        problem.target_cols
+    ] == -1) / 2
 
 
 class BlokusCoverProblem(SearchProblem):
