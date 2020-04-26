@@ -1,6 +1,6 @@
 from board import Board
 from search import SearchProblem, Node, STATE_SUCCESSOR, MOVE_SUCCESSOR
-from random import choice, random
+from random import choice
 import util
 import numpy as np
 
@@ -186,7 +186,7 @@ class ClosestLocationSearch:
         self.targets = np.array(targets.copy())
         self.target_rows = self.targets[:,0]
         self.target_cols = self.targets[:,1]
-        self.n_iter = 2 * board_w * board_h
+        self.n_iter = 10 * board_w * board_h
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
 
     def get_start_state(self):
@@ -226,16 +226,16 @@ class ClosestLocationSearch:
             if t == self.n_iter - 1 or self.is_goal_state(current.state):
                 return backtrace
             successors = self.get_successors(current.state)
-            # successors.sort(key=lambda successor: self.objective_function(successor[STATE_SUCCESSOR]))
-            # if len(successors) == 0:
-            #     return backtrace
-            # best_score = self.objective_function(successors[0][STATE_SUCCESSOR])
-            # best_successors = [successor for successor in successors
-            #                    if self.objective_function(successor[STATE_SUCCESSOR]) == best_score]
-            successor = choice(successors)
+            successors.sort(key=lambda successor: self.objective_function(successor[STATE_SUCCESSOR]))
+            if len(successors) == 0:
+                return backtrace
+            best_score = self.objective_function(successors[0][STATE_SUCCESSOR])
+            best_successors = [successor for successor in successors
+                               if self.objective_function(successor[STATE_SUCCESSOR]) == best_score]
+            successor = choice(best_successors)
             candidate = Node(successor[STATE_SUCCESSOR], parent=current, spawned_action=successor[MOVE_SUCCESSOR])
-            delta_e = self.objective_function(candidate.state)- self.objective_function(current.state)
-            if delta_e < 0 or random() < 0.5 * (0.9 ** (t + 1)):
+            delta_e = self.objective_function(candidate.state) - self.objective_function(current.state)
+            if delta_e < 0:
                 current = candidate
                 backtrace.append(current.spawned_action)
             t += 1
