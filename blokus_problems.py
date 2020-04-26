@@ -60,9 +60,9 @@ class BlokusCornersProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0)):
         targets = np.array([
             (0, 0),
-            (0, board_h - 1),
-            (board_w - 1, 0),
-            (board_w - 1, board_h - 1)
+            (board_h - 1, 0),
+            (0, board_w - 1),
+            (board_h - 1, board_w - 1)
         ])
         self.target_rows = targets[:,0]
         self.target_cols = targets[:,1]
