@@ -4,6 +4,7 @@ from random import choice, random
 import util
 import numpy as np
 
+
 class BlokusFillProblem(SearchProblem):
     """
     A one-player Blokus game as a search problem.
@@ -57,6 +58,14 @@ class BlokusFillProblem(SearchProblem):
 #####################################################
 class BlokusCornersProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0)):
+        targets = np.array([
+            (0, 0),
+            (board_h - 1, 0),
+            (0, board_w - 1),
+            (board_h - 1, board_w - 1)
+        ])
+        self.target_rows = targets[:,0]
+        self.target_cols = targets[:,1]
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
         self.expanded = 0
 
@@ -109,18 +118,10 @@ def blokus_corners_heuristic(state, problem):
     your heuristic is *not* consistent, and probably not admissible!  On the other hand,
     inadmissible or inconsistent heuristics may find optimal solutions, so be careful.
     """
-    n_empty = int(state.get_position(0, state.board_h - 1) == -1) \
-        + int(state.get_position(state.board_w - 1, 0) == -1) \
-        + int(state.get_position(state.board_w - 1, state.board_h - 1) == -1)
-
-    if n_empty == 0:
-        return 0
-
-    sum = 0
-    for piece in problem.board.piece_list.pieces[:n_empty]:
-        sum+=piece.get_num_tiles()
-
-    return sum
+    return np.count_nonzero(state.state[
+        problem.target_rows,
+        problem.target_cols
+    ] == -1) / 2
 
 
 class BlokusCoverProblem(SearchProblem):
@@ -168,15 +169,10 @@ class BlokusCoverProblem(SearchProblem):
 
 
 def blokus_cover_heuristic(state, problem):
-    # n_empty = 0
-    # for target in problem.targets:
-    #     if state.get_position(target[1], target[0]) == -1:
-    #         n_empty += 1
-    # return n_empty
     return np.count_nonzero(state.state[
         problem.target_rows,
         problem.target_cols
-    ] == -1)/2
+    ] == -1) / 2
 
 
 class ClosestLocationSearch:
@@ -190,6 +186,7 @@ class ClosestLocationSearch:
         self.targets = np.array(targets.copy())
         self.target_rows = self.targets[:,0]
         self.target_cols = self.targets[:,1]
+        self.n_iter = 2 * board_w * board_h
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
 
     def get_start_state(self):
@@ -220,16 +217,13 @@ class ClosestLocationSearch:
         This time we trade optimality for speed.
         Therefore, your agent should try and cover one target location at a time. Each time, aiming for the closest uncovered location.
         You may define helpful functions as you wish.
-
-        Probably a good way to start, would be something like this --
-
         """
-        n_iter = 100
+        self.n_iter = 30
         t = 0
         current = Node(self.get_start_state())
         backtrace  = []
         while True:
-            if t == n_iter-1 or self.is_goal_state(current.state):
+            if t == self.n_iter - 1 or self.is_goal_state(current.state):
                 return backtrace
             successors = self.get_successors(current.state)
             successors.sort(key=lambda successor: self.objective_function(successor[STATE_SUCCESSOR]))
@@ -241,10 +235,10 @@ class ClosestLocationSearch:
             successor = choice(best_successors)
             candidate = Node(successor[STATE_SUCCESSOR], parent=current, spawned_action=successor[MOVE_SUCCESSOR])
             delta_e = self.objective_function(candidate.state)- self.objective_function(current.state)
-            if delta_e <0 or random()<0.5**(t+1):
+            if delta_e < 0 or random() < 0.5 * (0.9 ** (t + 1)):
                 current = candidate
                 backtrace.append(current.spawned_action)
-            t+=1
+            t += 1
 
 
 
